@@ -1,10 +1,11 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { postPhoto } from "@/lib/api";
+import { postMonster } from "@/lib/api";
 
 export default function Home() {
   const inputRef = useRef<HTMLInputElement>(null);
+  const [name, setName] = useState("");
   const [preview, setPreview] = useState<string | null>(null);
   const [generated, setGenerated] = useState<string | null>(null);
   const [status, setStatus] = useState<"idle" | "sending" | "done" | "error">("idle");
@@ -24,7 +25,7 @@ export default function Home() {
 
     setStatus("sending");
     try {
-      const data = await postPhoto(file);
+      const data = await postMonster(name, file);
       if (data.success) {
         setGenerated(data.imageUrl);
         setStatus("done");
@@ -71,13 +72,22 @@ export default function Home() {
         </button>
 
         {preview && status !== "done" && (
-          <button
-            onClick={handleSubmit}
-            disabled={status === "sending"}
-            className="w-full rounded-full border border-zinc-900 py-3 text-base font-medium text-zinc-900 transition-colors hover:bg-zinc-100 disabled:opacity-50 dark:border-zinc-50 dark:text-zinc-50 dark:hover:bg-zinc-800"
-          >
-            {status === "sending" ? "送信中…" : "この写真を送信"}
-          </button>
+          <>
+            <input
+              type="text"
+              placeholder="妖怪名を入力"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full rounded-full border border-zinc-300 px-5 py-3 text-base text-zinc-900 outline-none focus:border-zinc-900 dark:border-zinc-700 dark:bg-black dark:text-zinc-50 dark:focus:border-zinc-50"
+            />
+            <button
+              onClick={handleSubmit}
+              disabled={status === "sending" || !name.trim()}
+              className="w-full rounded-full border border-zinc-900 py-3 text-base font-medium text-zinc-900 transition-colors hover:bg-zinc-100 disabled:opacity-50 dark:border-zinc-50 dark:text-zinc-50 dark:hover:bg-zinc-800"
+            >
+              {status === "sending" ? "送信中…" : "この写真を送信"}
+            </button>
+          </>
         )}
 
         {status === "done" && generated && (
