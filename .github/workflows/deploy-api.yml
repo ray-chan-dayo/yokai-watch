@@ -1,0 +1,23 @@
+name: Deploy API to Heroku
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "api/**"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Deploy to Heroku
+        env:
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+        run: |
+          git push https://heroku:$HEROKU_API_KEY@git.heroku.com/yokai-watch-api-production.git \
+            $(git subtree split --prefix=api HEAD):main --force
