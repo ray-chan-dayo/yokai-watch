@@ -1,5 +1,20 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## 環境変数
+
+`.env-sample` をコピーして `.env` を作成し、各キーに値を設定してください。
+
+```bash
+cp .env-sample .env
+```
+
+| 変数名 | 説明 |
+|---|---|
+| `CHATGPT_API_KEY` | OpenAI API キー（Next.js ルートハンドラ経由で直接呼ぶ場合） |
+| `NEXT_PUBLIC_API_URL` | API サーバーの URL（docker compose では自動設定） |
+
+> `.env` は `.gitignore` に含まれています。`.env-sample` にはキー名のみ記載しており、git 管理対象です。
+
 ## Getting Started
 
 First, run the development server:
