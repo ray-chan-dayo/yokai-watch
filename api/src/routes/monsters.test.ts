@@ -174,3 +174,48 @@ describe("GET /monsters/:id", () => {
     expect(res.status).toBe(404);
   });
 });
+
+describe("PATCH /monsters/:id", () => {
+  let monsterId: string;
+
+  beforeEach(async () => {
+    const monster = await prisma.monster.create({
+      data: { name: "ジバニャン", imageFilename: "jibanyan.png" },
+    });
+    monsterId = monster.id;
+  });
+
+  it("name を更新して更新後の monster を返す", async () => {
+    const res = await request(app)
+      .patch(`/monsters/${monsterId}`)
+      .send({ name: "ジバニャンEX" });
+
+    expect(res.status).toBe(200);
+    expect(res.body.id).toBe(monsterId);
+    expect(res.body.name).toBe("ジバニャンEX");
+  });
+
+  it("存在しないIDのとき 404 を返す", async () => {
+    const res = await request(app)
+      .patch("/monsters/non-existent-id")
+      .send({ name: "ジバニャンEX" });
+
+    expect(res.status).toBe(404);
+  });
+
+  it("name が空のとき 400 を返す", async () => {
+    const res = await request(app)
+      .patch(`/monsters/${monsterId}`)
+      .send({ name: "" });
+
+    expect(res.status).toBe(400);
+  });
+
+  it("name がないとき 400 を返す", async () => {
+    const res = await request(app)
+      .patch(`/monsters/${monsterId}`)
+      .send({});
+
+    expect(res.status).toBe(400);
+  });
+});

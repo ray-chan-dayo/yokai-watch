@@ -1,6 +1,7 @@
 import { Request, Response, Router } from "express";
 import multer from "multer";
 import { randomUUID } from "crypto";
+import { Prisma } from "@prisma/client";
 import prisma from "../lib/prisma";
 import { uploadImage } from "../lib/r2";
 
@@ -109,6 +110,27 @@ router.get("/", async (_req: Request, res: Response) => {
     orderBy: { name: "asc" },
   });
   res.json(monsters);
+});
+
+router.patch("/:id", async (req: Request, res: Response) => {
+  const name = req.body.name as string | undefined;
+  if (!name || !name.trim()) {
+    res.status(400).json({ success: false, message: "name が空です" });
+    return;
+  }
+  try {
+    const monster = await prisma.monster.update({
+      where: { id: req.params.id },
+      data: { name },
+    });
+    res.json(monster);
+  } catch (e) {
+    if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2025") {
+      res.status(404).json({ success: false, message: "妖怪が見つかりません" });
+      return;
+    }
+    throw e;
+  }
 });
 
 router.get("/:id", async (req: Request, res: Response) => {
