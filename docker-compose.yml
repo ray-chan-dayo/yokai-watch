@@ -31,6 +31,7 @@ services:
 
   api:
     build: ./api
+    command: npm run dev
     env_file:
       - path: ./api/.env
         required: false
@@ -40,12 +41,18 @@ services:
       PORT: 3000
       DATABASE_URL: postgresql://postgres@db:5432/development
       TEST_DATABASE_URL: postgresql://postgres@db_test:5432/test
+    volumes:
+      - ./api/src:/app/src
+      - ./api/prisma:/app/prisma
+      - ./api/tsconfig.json:/app/tsconfig.json
+      - ./api/vitest.config.ts:/app/vitest.config.ts
     depends_on:
       db:
         condition: service_healthy
 
   web:
     build: ./web
+    command: npm run dev
     env_file:
       - path: ./web/.env
         required: false
@@ -53,6 +60,10 @@ services:
       - "3000:3000"
     environment:
       NEXT_PUBLIC_API_URL: http://localhost:3001
+    volumes:
+      - ./web/src:/app/src
+      - ./web/public:/app/public
+      - ./web/next.config.ts:/app/next.config.ts
     depends_on:
       - api
 
