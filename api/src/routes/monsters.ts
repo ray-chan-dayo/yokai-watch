@@ -133,6 +133,19 @@ router.patch("/:id", async (req: Request, res: Response) => {
   }
 });
 
+router.delete("/:id", async (req: Request, res: Response) => {
+  try {
+    await prisma.monster.delete({ where: { id: req.params.id } });
+    res.status(204).send();
+  } catch (e) {
+    if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2025") {
+      res.status(404).json({ success: false, message: "妖怪が見つかりません" });
+      return;
+    }
+    throw e;
+  }
+});
+
 router.get("/:id", async (req: Request, res: Response) => {
   const monster = await prisma.monster.findUnique({
     where: { id: req.params.id },

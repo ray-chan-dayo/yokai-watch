@@ -219,3 +219,33 @@ describe("PATCH /monsters/:id", () => {
     expect(res.status).toBe(400);
   });
 });
+
+describe("DELETE /monsters/:id", () => {
+  let monsterId: string;
+
+  beforeEach(async () => {
+    const monster = await prisma.monster.create({
+      data: { name: "ジバニャン", imageFilename: "jibanyan.png" },
+    });
+    monsterId = monster.id;
+  });
+
+  it("正常に削除して 204 を返す", async () => {
+    const res = await request(app).delete(`/monsters/${monsterId}`);
+
+    expect(res.status).toBe(204);
+  });
+
+  it("削除後に GET すると 404 になる", async () => {
+    await request(app).delete(`/monsters/${monsterId}`);
+
+    const res = await request(app).get(`/monsters/${monsterId}`);
+    expect(res.status).toBe(404);
+  });
+
+  it("存在しないIDのとき 404 を返す", async () => {
+    const res = await request(app).delete("/monsters/non-existent-id");
+
+    expect(res.status).toBe(404);
+  });
+});
