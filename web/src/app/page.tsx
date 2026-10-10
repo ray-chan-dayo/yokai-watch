@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { postPhoto } from "@/lib/api";
 
 export default function Home() {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -21,18 +22,14 @@ export default function Home() {
     const file = inputRef.current?.files?.[0];
     if (!file) return;
 
-    const formData = new FormData();
-    formData.append("photo", file);
-
     setStatus("sending");
     try {
-      const res = await fetch("/api/photos", { method: "POST", body: formData });
-      const data = await res.json();
-      if (res.ok && data.success) {
+      const data = await postPhoto(file);
+      if (data.success) {
         setGenerated(data.imageUrl);
         setStatus("done");
       } else {
-        setErrorMessage(data.message ?? "送信に失敗しました");
+        setErrorMessage(data.message);
         setStatus("error");
       }
     } catch {
