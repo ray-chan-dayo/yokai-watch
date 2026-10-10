@@ -149,3 +149,28 @@ describe("POST /monsters", () => {
     expect(saved?.imageFilename).toBe(res.body.imageFilename);
   });
 });
+
+describe("GET /monsters/:id", () => {
+  let monsterId: string;
+
+  beforeEach(async () => {
+    const monster = await prisma.monster.create({
+      data: { name: "ジバニャン", imageFilename: "jibanyan.png" },
+    });
+    monsterId = monster.id;
+  });
+
+  it("存在するIDのとき monster を返す", async () => {
+    const res = await request(app).get(`/monsters/${monsterId}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.id).toBe(monsterId);
+    expect(res.body.name).toBe("ジバニャン");
+  });
+
+  it("存在しないIDのとき 404 を返す", async () => {
+    const res = await request(app).get("/monsters/non-existent-id");
+
+    expect(res.status).toBe(404);
+  });
+});

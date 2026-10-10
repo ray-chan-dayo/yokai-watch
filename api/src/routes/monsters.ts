@@ -111,4 +111,15 @@ router.get("/", async (_req: Request, res: Response) => {
   res.json(monsters);
 });
 
+router.get("/:id", async (req: Request, res: Response) => {
+  const monster = await prisma.monster.findUnique({
+    where: { id: req.params.id },
+  });
+  if (!monster) {
+    res.status(404).json({ success: false, message: "妖怪が見つかりません" });
+    return;
+  }
+  res.json(monster);
+});
+
 export default router;
