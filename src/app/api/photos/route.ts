@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import OpenAI from "openai";
 
-const openai = new OpenAI({ apiKey: process.env.CHATGPT_API_KEY });
+const PROMPT =
+  "この写真に写っている人物の特徴を活かして、妖怪ウォッチ風の可愛いデフォルメキャラクターの画像を生成してください。" +
+  "顔や体が一部しか見えない場合や画質が粗い場合でも、見える範囲から想像してキャラクターを作成してください。" +
+  "人物が一切写っていない場合のみ、画像を生成せず「NO_PERSON」とテキストのみで返してください。";
 
 export async function POST(req: NextRequest) {
   const formData = await req.formData();
@@ -18,55 +20,67 @@ export async function POST(req: NextRequest) {
   const base64 = Buffer.from(bytes).toString("base64");
   const mimeType = photo.type || "image/jpeg";
 
-  const visionRes = await openai.chat.completions.create({
-    model: "gpt-4o",
-    messages: [
-      {
-        role: "user",
-        content: [
-          {
-            type: "image_url",
-            image_url: { url: `data:${mimeType};base64,${base64}` },
-          },
-          {
-            type: "text",
-            text: "この写真に写っている人物の特徴（性別、年齢感、髪型、表情、服装など）を詳しく日本語で説明してください。人物が特定できない場合は「人物を特定できませんでした」とだけ返してください。",
-          },
-        ],
-      },
-    ],
-    max_tokens: 500,
+  const res = await fetch("https://api.openai.com/v1/responses", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${process.env.CHATGPT_API_KEY}`,
+    },
+    body: JSON.stringify({
+      model: "gpt-6-luna",
+      input: [
+        {
+          role: "user",
+          content: [
+            {
+              type: "input_image",
+              image_url: `data:${mimeType};base64,${base64}`,
+            },
+            {
+              type: "input_text",
+              text: PROMPT,
+            },
+          ],
+        },
+      ],
+      tools: [{ type: "image_generation" }],
+    }),
   });
 
-  const description = visionRes.choices[0]?.message?.content ?? "";
+  const data = await res.json();
 
-  if (description.includes("人物を特定できませんでした")) {
+  if (data.error) {
+    return NextResponse.json(
+      { success: false, message: data.error.message },
+      { status: 422 }
+    );
+  }
+
+  const imageOutput = data.output?.find(
+    (o: { type: string }) => o.type === "image_generation_call"
+  );
+
+  if (imageOutput?.result) {
+    return NextResponse.json(
+      { success: true, imageUrl: `data:image/png;base64,${imageOutput.result}` },
+      { status: 201 }
+    );
+  }
+
+  const messageOutput = data.output?.find(
+    (o: { type: string }) => o.type === "message"
+  );
+  const text = messageOutput?.content?.[0]?.text ?? "";
+
+  if (text.trim() === "NO_PERSON") {
     return NextResponse.json(
       { success: false, message: "人物を特定できませんでした" },
       { status: 422 }
     );
   }
 
-  const imageRes = await openai.images.generate({
-    model: "dall-e-3",
-    prompt: `妖怪ウォッチ風のキャラクターイラスト。以下の特徴を持つ人物をベースに、可愛くデフォルメした妖怪キャラクターを生成してください。特徴: ${description}`,
-    size: "1024x1024",
-    quality: "standard",
-    n: 1,
-    response_format: "b64_json",
-  });
-
-  const imageData = imageRes.data?.[0]?.b64_json;
-
-  if (!imageData) {
-    return NextResponse.json(
-      { success: false, message: "画像の生成に失敗しました" },
-      { status: 422 }
-    );
-  }
-
   return NextResponse.json(
-    { success: true, imageUrl: `data:image/png;base64,${imageData}` },
-    { status: 201 }
+    { success: false, message: "画像の生成に失敗しました" },
+    { status: 422 }
   );
 }
