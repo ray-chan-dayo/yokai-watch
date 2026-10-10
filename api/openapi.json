@@ -1,0 +1,214 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "石巻2026 妖怪ウォッチ API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/": {
+      "get": {
+        "summary": "ヘルスチェック",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/monsters": {
+      "get": {
+        "summary": "妖怪一覧取得",
+        "responses": {
+          "200": {
+            "description": "妖怪一覧（名前の昇順）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Monster" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "妖怪生成・登録",
+        "description": "写真と妖怪名を送ると ChatGPT で妖怪キャラクター画像とメダル画像を生成し、R2 に保存した上で monsters レコードを作成する。",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": ["name", "photo"],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "妖怪名"
+                  },
+                  "photo": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "元となる人物写真"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "生成・保存成功",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Monster" }
+              }
+            }
+          },
+          "400": {
+            "description": "name または photo が未指定",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "画像生成失敗（人物不在・API エラー）",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/monsters/{id}": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "string", "format": "uuid" }
+        }
+      ],
+      "get": {
+        "summary": "妖怪取得",
+        "responses": {
+          "200": {
+            "description": "妖怪情報",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Monster" }
+              }
+            }
+          },
+          "404": {
+            "description": "妖怪が見つからない",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "summary": "妖怪名更新",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["name"],
+                "properties": {
+                  "name": { "type": "string", "description": "新しい妖怪名" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "更新後の妖怪情報",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Monster" }
+              }
+            }
+          },
+          "400": {
+            "description": "name が空",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "404": {
+            "description": "妖怪が見つからない",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "妖怪削除",
+        "description": "DB から monsters レコードを削除する。R2 上の画像ファイルは削除しない。",
+        "responses": {
+          "204": {
+            "description": "削除成功"
+          },
+          "404": {
+            "description": "妖怪が見つからない",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Monster": {
+        "type": "object",
+        "required": ["id", "name", "imageFilename"],
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "name": { "type": "string" },
+          "imageFilename": { "type": "string", "example": "550e8400-e29b-41d4-a716-446655440000.png" },
+          "medalFilename": { "type": "string", "nullable": true },
+          "bookId": { "type": "string", "format": "uuid", "nullable": true },
+          "description": { "type": "string", "nullable": true }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "required": ["success", "message"],
+        "properties": {
+          "success": { "type": "boolean", "example": false },
+          "message": { "type": "string" }
+        }
+      }
+    }
+  }
+}
