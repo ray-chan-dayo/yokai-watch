@@ -27,12 +27,16 @@ export default function Home() {
     setStatus("sending");
     try {
       const res = await fetch("/api/photos", { method: "POST", body: formData });
-      if (res.ok) {
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setGenerated(data.imageUrl);
         setStatus("done");
       } else {
+        setErrorMessage(data.message ?? "送信に失敗しました");
         setStatus("error");
       }
     } catch {
+      setErrorMessage("送信に失敗しました");
       setStatus("error");
     }
   }
@@ -79,11 +83,19 @@ export default function Home() {
           </button>
         )}
 
-        {status === "done" && (
-          <p className="text-sm text-green-600 dark:text-green-400">送信しました</p>
+        {status === "done" && generated && (
+          <div className="flex w-full flex-col items-center gap-2">
+            <p className="text-sm text-green-600 dark:text-green-400">生成しました</p>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={generated}
+              alt="生成された妖怪キャラクター"
+              className="w-full rounded-2xl object-cover"
+            />
+          </div>
         )}
         {status === "error" && (
-          <p className="text-sm text-red-500">送信に失敗しました</p>
+          <p className="text-sm text-red-500">{errorMessage}</p>
         )}
       </div>
     </div>
