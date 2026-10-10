@@ -20,4 +20,4 @@ jobs:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
         run: |
           git push https://heroku:$HEROKU_API_KEY@git.heroku.com/yokai-watch-api-production.git \
-            $(git subtree split --prefix=api HEAD):main --force
+            $(git subtree split --prefix=api HEAD):refs/heads/main --force
