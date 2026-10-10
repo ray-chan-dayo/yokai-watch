@@ -1,0 +1,15 @@
+services:
+  api:
+    command: npm run dev
+    volumes:
+      - ./api/src:/app/src
+      - ./api/prisma:/app/prisma
+      - ./api/tsconfig.json:/app/tsconfig.json
+      - ./api/vitest.config.ts:/app/vitest.config.ts
+
+  web:
+    command: npm run dev
+    volumes:
+      - ./web/src:/app/src
+      - ./web/public:/app/public
+      - ./web/next.config.ts:/app/next.config.ts

@@ -1,5 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
 }
 
 datasource db {
@@ -7,8 +8,21 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model GeneratedImage {
-  id        Int      @id @default(autoincrement())
-  imageData String   // base64 encoded PNG
-  createdAt DateTime @default(now())
+model Book {
+  id       String    @id @default(uuid())
+  monsters Monster[]
+
+  @@map("books")
+}
+
+model Monster {
+  id             String  @id @default(uuid())
+  bookId         String?
+  name           String
+  imageFilename  String
+  medalFilename  String?
+  description    String?
+  book           Book?   @relation(fields: [bookId], references: [id])
+
+  @@map("monsters")
 }
