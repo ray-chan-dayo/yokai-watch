@@ -1,31 +1,42 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { postMonster } from "@/lib/api";
 
 export default function Home() {
   const inputRef = useRef<HTMLInputElement>(null);
   const [name, setName] = useState("");
+  const [photo, setPhoto] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [generated, setGenerated] = useState<string | null>(null);
   const [status, setStatus] = useState<"idle" | "sending" | "done" | "error">("idle");
-  const [errorMessage, setErrorMessage] = useState<string>("");
+  const [errorMessage, setErrorMessage] = useState("");
 
-  function handleCapture(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
+  useEffect(() => {
+    if (!preview) return;
+    return () => URL.revokeObjectURL(preview);
+  }, [preview]);
+
+  function handleCapture(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
     if (!file) return;
+
+    setPhoto(file);
     setPreview(URL.createObjectURL(file));
     setGenerated(null);
+    setErrorMessage("");
     setStatus("idle");
+    // Let the user choose the same image again after retaking or retrying.
+    event.currentTarget.value = "";
   }
 
   async function handleSubmit() {
-    const file = inputRef.current?.files?.[0];
-    if (!file) return;
+    if (!photo || !name.trim()) return;
 
     setStatus("sending");
+    setErrorMessage("");
     try {
-      const data = await postMonster(name, file);
+      const data = await postMonster(name.trim(), photo);
       if (data.success) {
         setGenerated(data.imageUrl);
         setStatus("done");
@@ -34,77 +45,97 @@ export default function Home() {
         setStatus("error");
       }
     } catch {
-      setErrorMessage("送信に失敗しました");
+      setErrorMessage("送信に失敗しました。通信環境を確認して、もう一度お試しください。");
       setStatus("error");
     }
   }
 
-  return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-zinc-50 p-8 dark:bg-black">
-      <div className="flex w-full max-w-sm flex-col items-center gap-6">
-        <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">
-          妖怪ウォッチ変換
-        </h1>
+  const isReady = Boolean(photo && name.trim());
 
-        {preview && (
-          // eslint-disable-next-line @next/next/no-img-element
+  return (
+    <main className="home-shell">
+      <section className="create-panel" aria-labelledby="page-title">
+        <header className="page-heading">
+          <svg className="title-flame title-flame-left" aria-hidden="true" viewBox="0 0 100 160">
+            <path d="M50 5c4 28 38 39 38 72 0 24-17 43-39 43S10 103 10 80c0-16 9-28 25-38-2 15 4 24 14 30C64 55 56 32 50 5Z" />
+            <path className="title-flame-cutout" d="M48 87c-10 4-15 11-15 20 0 9 7 15 16 15s17-7 17-16c0-7-5-12-12-16 2 8 0 13-5 16-5-5-4-12-1-19Z" />
+          </svg>
+          <h1 id="page-title"><span>なかま妖怪</span><span>大図鑑</span></h1>
+          <svg className="title-flame title-flame-right" aria-hidden="true" viewBox="0 0 100 160">
+            <path d="M50 5c4 28 38 39 38 72 0 24-17 43-39 43S10 103 10 80c0-16 9-28 25-38-2 15 4 24 14 30C64 55 56 32 50 5Z" />
+            <path className="title-flame-cutout" d="M48 87c-10 4-15 11-15 20 0 9 7 15 16 15s17-7 17-16c0-7-5-12-12-16 2 8 0 13-5 16-5-5-4-12-1-19Z" />
+          </svg>
+        </header>
+
+        <div className="photo-frame">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={preview}
-            alt="撮影した写真"
-            className="w-full rounded-2xl object-cover"
+            src={preview ?? "/hero-sample.jpg"}
+            alt={preview ? "選択した写真のプレビュー" : "写真プレビューのサンプル"}
+            className="photo-preview"
           />
-        )}
+          {preview && <span className="photo-badge">写真を選択中</span>}
+        </div>
 
         <input
           ref={inputRef}
           type="file"
           accept="image/*"
           capture="environment"
-          className="hidden"
+          className="visually-hidden"
           onChange={handleCapture}
+          aria-label="変換する写真を選ぶ"
         />
 
-        <button
-          onClick={() => inputRef.current?.click()}
-          className="w-full rounded-full bg-zinc-900 py-3 text-base font-medium text-white transition-colors hover:bg-zinc-700 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200"
-        >
-          カメラで撮影
-        </button>
+        <div className="form-stack">
+          <button className="camera-button" onClick={() => inputRef.current?.click()}>
+            再撮影
+          </button>
 
-        {preview && status !== "done" && (
-          <>
+          <label className="name-field">
+            <span className="visually-hidden">妖怪の名前</span>
             <input
               type="text"
-              placeholder="妖怪名を入力"
+              placeholder="妖怪のなまえを入力"
               value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full rounded-full border border-zinc-300 px-5 py-3 text-base text-zinc-900 outline-none focus:border-zinc-900 dark:border-zinc-700 dark:bg-black dark:text-zinc-50 dark:focus:border-zinc-50"
+              onChange={(event) => setName(event.target.value)}
+              maxLength={40}
+              autoComplete="off"
             />
-            <button
-              onClick={handleSubmit}
-              disabled={status === "sending" || !name.trim()}
-              className="w-full rounded-full border border-zinc-900 py-3 text-base font-medium text-zinc-900 transition-colors hover:bg-zinc-100 disabled:opacity-50 dark:border-zinc-50 dark:text-zinc-50 dark:hover:bg-zinc-800"
-            >
-              {status === "sending" ? "送信中…" : "この写真を送信"}
-            </button>
-          </>
-        )}
+            <span className="name-sparkle" aria-hidden="true">✧</span>
+          </label>
+
+          <button
+            className="submit-button"
+            onClick={handleSubmit}
+            disabled={!isReady || status === "sending" || status === "done"}
+          >
+            {status === "sending" ? (
+              <><span className="loading-dot" aria-hidden="true" />妖怪を召喚中…</>
+            ) : status === "done" ? "生成しました" : "この写真を送信"}
+          </button>
+        </div>
+
+        {status === "error" && <p className="error-message" role="alert">{errorMessage}</p>}
 
         {status === "done" && generated && (
-          <div className="flex w-full flex-col items-center gap-2">
-            <p className="text-sm text-green-600 dark:text-green-400">生成しました</p>
+          <section className="result-card" aria-live="polite" aria-label="生成された妖怪">
+            <p className="result-label"><span aria-hidden="true">✦</span> あなたの妖怪</p>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={generated}
-              alt="生成された妖怪キャラクター"
-              className="w-full rounded-2xl object-cover"
-            />
-          </div>
+            <img src={generated} alt={`${name}から生まれた妖怪`} />
+            <p className="result-name">{name}</p>
+            <button
+              className="reset-button"
+              onClick={() => {
+                setStatus("idle");
+                setGenerated(null);
+              }}
+            >
+              もう一度つくる
+            </button>
+          </section>
         )}
-        {status === "error" && (
-          <p className="text-sm text-red-500">{errorMessage}</p>
-        )}
-      </div>
-    </div>
+      </section>
+    </main>
   );
 }
