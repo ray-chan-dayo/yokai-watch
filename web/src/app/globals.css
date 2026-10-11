@@ -230,6 +230,259 @@ button { -webkit-tap-highlight-color: transparent; }
   cursor: not-allowed;
 }
 
+.result-view {
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  min-height: max(100svh, 216.5vw);
+  overflow: hidden;
+  background-color: var(--paper);
+  background-image: url("/youkai-pattern.png"), url("/youkai-gradient.png");
+  background-position: center top, center top;
+  background-repeat: repeat-y, no-repeat;
+  background-size: 100% auto, 100% 100%;
+}
+
+.result-banner {
+  position: relative;
+  z-index: 2;
+  height: 21.2vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(110deg, #41c7e8 0%, #7dbef1 100%);
+}
+
+.page-heading-compact {
+  width: 100%;
+  min-height: 100%;
+  margin: 0;
+}
+
+.page-heading-compact h1 {
+  font-size: clamp(22px, 7.5vw, 88px);
+  line-height: 1.02;
+  letter-spacing: .01em;
+}
+
+.page-heading-compact h1 span:last-child { font-size: .92em; }
+.page-heading-compact .title-flame { width: 5vw; height: 8vw; }
+.page-heading-compact .title-flame-left { left: 31%; }
+.page-heading-compact .title-flame-right { right: 31%; }
+
+.result-stage {
+  position: relative;
+  height: 124.2vw;
+}
+
+.result-monster-name {
+  position: absolute;
+  z-index: 2;
+  top: 6vw;
+  left: 7vw;
+  max-width: 92vw;
+  margin: 0;
+  color: white;
+  font-family: "Youkai Display", sans-serif;
+  font-size: clamp(38px, 15vw, 176px);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: .015em;
+  overflow-wrap: anywhere;
+  transform: rotate(-12deg);
+  transform-origin: left center;
+}
+
+.result-character {
+  position: absolute;
+  z-index: 1;
+  top: 25vw;
+  left: 7vw;
+  width: 84vw;
+  height: 94vw;
+  object-fit: contain;
+  filter: drop-shadow(0 12px 14px rgba(48, 103, 142, .14));
+}
+
+.result-medal {
+  position: absolute;
+  z-index: 3;
+  top: 100vw;
+  right: 3.5vw;
+  width: 38vw;
+  height: 38vw;
+  object-fit: contain;
+  filter: drop-shadow(0 5px 8px rgba(31, 69, 97, .3));
+}
+
+.result-details {
+  position: relative;
+  z-index: 2;
+  min-height: 71.1vw;
+  padding: 15.5vw 6vw 8vw;
+  color: #fff;
+}
+
+.result-details::before {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background: #50c8e7;
+  clip-path: polygon(0 0, 100% 57.5%, 100% 100%, 0 100%);
+  content: "";
+}
+
+.result-detail { position: relative; z-index: 1; }
+.result-skill { margin-bottom: 6.6vw; }
+
+.detail-label {
+  display: inline-block;
+  padding: 0 6px;
+  background: rgba(255, 255, 255, .3);
+  color: #288bb9;
+  font-family: "Youkai Display", sans-serif;
+  font-size: 4.7vw;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.detail-value {
+  margin: 2vw 0 0;
+  color: white;
+  font-family: "Youkai Display", sans-serif;
+  font-size: 7.4vw;
+  font-weight: 700;
+  line-height: 1.22;
+  letter-spacing: .04em;
+}
+
+.directory-button {
+  position: absolute;
+  right: 3vw;
+  bottom: 7.2vw;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5vw;
+  min-width: 37vw;
+  min-height: 7vw;
+  padding: .6vw 2vw;
+  border: 0;
+  border-radius: 1.8vw;
+  background: rgba(255, 255, 255, .28);
+  color: white;
+  font-family: "Youkai Display", sans-serif;
+  font-size: 5.4vw;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.directory-button svg { width: 6.4vw; height: 6.4vw; fill: currentColor; }
+
+.directory-view {
+  min-height: 100svh;
+  background-color: var(--paper);
+  background-image: url("/youkai-pattern.png"), url("/youkai-gradient.png");
+  background-position: center top, center top;
+  background-repeat: repeat-y, no-repeat;
+  background-size: 100% auto, 100% 100%;
+}
+
+.directory-banner {
+  height: 21.2vw;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(110deg, #41c7e8 0%, #7dbef1 100%);
+}
+
+.directory-content {
+  width: min(100% - 40px, 860px);
+  margin: 0 auto;
+  padding: clamp(28px, 6vw, 68px) 0 48px;
+}
+
+.directory-content > h2 {
+  margin: 0;
+  color: white;
+  font-family: "Youkai Display", sans-serif;
+  font-size: clamp(34px, 7vw, 64px);
+  letter-spacing: .06em;
+  text-align: center;
+  text-shadow: 0 2px 3px rgba(42, 127, 191, .12);
+}
+
+.directory-intro {
+  margin: 8px 0 28px;
+  color: rgba(255, 255, 255, .9);
+  font-family: "Youkai Display", sans-serif;
+  font-size: clamp(16px, 3vw, 24px);
+  text-align: center;
+}
+
+.monster-grid { display: grid; gap: 14px; }
+
+.monster-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+  padding: 12px 50px 12px 12px;
+  border: 1px solid rgba(255, 255, 255, .65);
+  border-radius: 24px;
+  background: rgba(255, 255, 255, .82);
+  box-shadow: 0 8px 22px rgba(44, 109, 150, .1);
+}
+
+.monster-card > img {
+  width: clamp(76px, 18vw, 132px);
+  height: clamp(76px, 18vw, 132px);
+  flex: 0 0 auto;
+  object-fit: contain;
+  border-radius: 18px;
+  background: linear-gradient(145deg, rgba(122, 197, 235, .25), rgba(255, 255, 255, .5));
+}
+
+.monster-card div { min-width: 0; }
+.monster-card div > span { color: #6badd0; font-size: 12px; font-weight: 700; }
+.monster-card h3 { margin: 5px 0 0; color: #268bb8; font-family: "Youkai Display", sans-serif; font-size: clamp(19px, 4.7vw, 30px); overflow-wrap: anywhere; }
+.monster-card-arrow { position: absolute; right: 20px; color: #77c4e4; font-size: 38px; line-height: 1; }
+
+.directory-empty {
+  margin: 0;
+  padding: 35px 20px;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, .78);
+  color: #268bb8;
+  font-family: "Youkai Display", sans-serif;
+  font-size: 19px;
+  line-height: 1.8;
+  text-align: center;
+}
+
+.directory-back {
+  display: block;
+  min-width: 150px;
+  margin: 30px auto 0;
+  padding: 11px 24px;
+  border: 1px solid rgba(255, 255, 255, .8);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .28);
+  color: white;
+  font-family: "Youkai Display", sans-serif;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.directory-back span { margin-right: 5px; font-family: Arial, sans-serif; }
+
+@media (min-width: 700px) {
+  .monster-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .directory-banner { height: 140px; }
+}
+
 .loading-dot {
   width: 15px;
   height: 15px;
@@ -247,31 +500,6 @@ button { -webkit-tap-highlight-color: transparent; }
   font-size: 14px;
   line-height: 1.6;
   text-align: center;
-}
-
-.result-card {
-  margin-top: 28px;
-  padding: 22px;
-  border: 1px solid #ece8f0;
-  border-radius: 26px;
-  background: white;
-  text-align: center;
-  box-shadow: 0 12px 30px rgba(45, 35, 48, .07);
-}
-
-.result-label { margin: 0 0 15px; color: var(--purple); font-weight: 700; }
-.result-label span { margin-right: 5px; }
-.result-card img { display: block; width: 100%; border-radius: 17px; }
-.result-name { margin: 13px 0 0; font-family: "Youkai Display", sans-serif; font-size: 23px; }
-
-.reset-button {
-  margin-top: 17px;
-  padding: 10px 20px;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  background: white;
-  color: var(--ink);
-  cursor: pointer;
 }
 
 @media (max-width: 560px) {
